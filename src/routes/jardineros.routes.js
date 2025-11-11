@@ -6,7 +6,7 @@ const router = Router();
 
 router.get('/jardineros', verifyToken, getJardineros);
 router.get('/jardineros/:id', verifyToken, getJardineroById);
-router.post('/jardineros', verifyToken, postJardinero);
+router.post('/jardineros', postJardinero);
 router.put('/jardineros/:id', verifyToken, putJardinero);
 router.delete('/jardineros/:id', verifyToken, deleteJardinero);
 

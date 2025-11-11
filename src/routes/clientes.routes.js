@@ -6,7 +6,7 @@ const router = Router();
 
 router.get('/clientes', verifyToken, getClientes);
 router.get('/clientes/:id', verifyToken, getClienteById);
-router.post('/clientes', verifyToken, postCliente);
+router.post('/clientes', postCliente);
 router.put('/clientes/:id', verifyToken, putCliente);
 router.delete('/clientes/:id', verifyToken, deleteCliente);
 
