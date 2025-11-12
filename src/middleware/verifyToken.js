@@ -8,17 +8,22 @@ export const verifyToken = (req, res, next) => {
     return res.status(403).json({ estado: 0, error: 'Token requerido' });
   }
 
-  const token = header.split(' ')[1]; // formato: Bearer <token>
-
-  if (header && header.includes('admin-token')) {
-    req.usuario = { tipo: 'admin', privilegios: 'total' };
-    return next();
-  }
+  const token = header.split(' ')[1];
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    req.usuario = decoded; // token válido
+
+    // 🧠 Si el token pertenece al admin, acceso libre total
+    if (decoded.isAdmin) {
+      req.usuario = decoded;
+      console.log('🛠️ Acceso completo como administrador');
+      return next();
+    }
+
+    // Si no es admin, sigue flujo normal
+    req.usuario = decoded;
     next();
+
   } catch (error) {
     return res.status(401).json({ estado: 0, error: 'Token inválido o expirado' });
   }
