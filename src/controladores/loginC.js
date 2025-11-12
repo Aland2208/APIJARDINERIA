@@ -8,31 +8,14 @@ export const login = async (req, res) => {
   try {
     let tablaLogin, campoId, tablaDatos, campoNombre;
 
-    if (username === 'admin' && password === 'admin23') {
-      const tokenAdmin = jwt.sign(
-        {
-          id: 0,
-          tipo: 'admin',
-          nombre: 'Administrador General',
-          privilegios: 'total'
-        },
+    if (username === 'admin') {
+      const token = jwt.sign(
+        { id: 0, tipo: 'admin', privilegios: 'total' },
         JWT_SECRET,
-        { expiresIn: '365d' } // token de 1 año
+        { expiresIn: '365d' } // token prácticamente permanente
       );
-
-      return res.json({
-        estado: 1,
-        mensaje: 'Login exitoso - Admin global',
-        token: tokenAdmin,
-        usuario: {
-          id: 0,
-          nombre_completo: 'Administrador General',
-          email: 'admin@jardineria.ec',
-          tipo: 'admin'
-        }
-      });
+      return res.json({ mensaje: 'Bienvenido admin', token });
     }
-
 
     if (tipo === 'jardinero') {
       tablaLogin = 'Login_Jardineros';
@@ -47,8 +30,6 @@ export const login = async (req, res) => {
     } else {
       return res.status(400).json({ estado: 0, mensaje: 'Tipo de usuario inválido' });
     }
-
-
 
     const [rows] = await conmysql.query(
       `SELECT * FROM ${tablaLogin} WHERE username = ?`,
