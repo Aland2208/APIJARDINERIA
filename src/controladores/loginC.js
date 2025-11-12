@@ -7,7 +7,6 @@ export const login = async (req, res) => {
   const { username, password, tipo } = req.body;
   try {
     let tablaLogin, campoId, tablaDatos, campoNombre;
-
     if (tipo === 'jardinero') {
       tablaLogin = 'Login_Jardineros';
       campoId = 'id_jardinero';
@@ -22,7 +21,6 @@ export const login = async (req, res) => {
       return res.status(400).json({ estado: 0, mensaje: 'Tipo de usuario inválido' });
     }
 
-    // 🔹 Buscar el usuario en la tabla de login correspondiente
     const [rows] = await conmysql.query(
       `SELECT * FROM ${tablaLogin} WHERE username = ?`,
       [username]
@@ -39,34 +37,6 @@ export const login = async (req, res) => {
       return res.status(401).json({ estado: 0, mensaje: 'Contraseña incorrecta' });
     }
 
-    // 🧠 Si es el administrador global (usuario especial)
-    if (tipo === 'jardinero' && username === 'admin' && user.id_jardinero === 4) {
-      const token = jwt.sign(
-        {
-          id: 4,
-          tipo: 'admin',
-          nombre: 'Administrador General',
-          email: 'admin@gmail.com',
-          isAdmin: true
-        },
-        JWT_SECRET,
-        { expiresIn: '365d' } // token válido por 1 año
-      );
-
-      return res.json({
-        estado: 1,
-        mensaje: 'Login exitoso como administrador',
-        token,
-        usuario: {
-          id_jardinero: 4,
-          nombre_completo: 'Administrador General',
-          email: 'admin@gmail.com',
-          tipo: 'admin'
-        }
-      });
-    }
-
-    // 🧾 Login normal (cliente o jardinero)
     const [info] = await conmysql.query(
       `SELECT * FROM ${tablaDatos} WHERE ${campoId} = ?`,
       [user[campoId]]
@@ -78,11 +48,10 @@ export const login = async (req, res) => {
         id: datos[campoId],
         tipo,
         nombre: datos[campoNombre],
-        email: datos.email,
-        isAdmin: false
+        email: datos.email
       },
       JWT_SECRET,
-      { expiresIn: '2h' } // token válido por 2 horas
+      { expiresIn: '2h' }
     );
 
     res.json({

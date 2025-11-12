@@ -12,18 +12,8 @@ export const verifyToken = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-
-    // 🧠 Si el token pertenece al admin global → acceso libre total
-    if (decoded.isAdmin) {
-      req.usuario = decoded;
-      console.log('🛠️ Acceso completo como administrador');
-      return next();
-    }
-
-    // 🟢 Si no es admin, sigue validando normalmente
-    req.usuario = decoded;
+    req.usuario = decoded; // token válido
     next();
-
   } catch (error) {
     return res.status(401).json({ estado: 0, error: 'Token inválido o expirado' });
   }
