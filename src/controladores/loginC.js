@@ -7,16 +7,6 @@ export const login = async (req, res) => {
   const { username, password, tipo } = req.body;
   try {
     let tablaLogin, campoId, tablaDatos, campoNombre;
-
-    if (username === 'admin') {
-      const token = jwt.sign(
-        { id: 0, tipo: 'admin', privilegios: 'total' },
-        JWT_SECRET,
-        { expiresIn: '365d' } // token prácticamente permanente
-      );
-      return res.json({ mensaje: 'Bienvenido admin', token });
-    }
-
     if (tipo === 'jardinero') {
       tablaLogin = 'Login_Jardineros';
       campoId = 'id_jardinero';

@@ -26,6 +26,19 @@ export const postCliente = async (req, res) => {
     try {
         const { nombre_completo, email, telefono, direccion, username, password } = req.body;
 
+        // Validación simple
+        if (!nombre_completo || !email || !telefono || !direccion || !username || !password) {
+            return res.status(400).json({ mensaje: 'Faltan campos requeridos' });
+        }
+
+        // Verificar si el email o username ya existen
+        const [existeEmail] = await conmysql.query('SELECT 1 FROM Clientes WHERE email = ?', [email]);
+        const [existeUser] = await conmysql.query('SELECT 1 FROM Login_Clientes WHERE username = ?', [username]);
+
+        if (existeEmail.length > 0) return res.status(409).json({ mensaje: 'Email ya registrado' });
+        if (existeUser.length > 0) return res.status(409).json({ mensaje: 'Usuario ya existe' });
+
+        // Insertar cliente
         const [insertCliente] = await conmysql.query(
             'INSERT INTO Clientes(nombre_completo, email, telefono, direccion) VALUES (?,?,?,?)',
             [nombre_completo, email, telefono, direccion]
@@ -39,8 +52,9 @@ export const postCliente = async (req, res) => {
             [id_cliente, username, hash]
         );
 
-        res.json({ mensaje: 'Cliente registrado exitosamente', id_cliente });
+        res.status(201).json({ mensaje: 'Cliente registrado exitosamente', id_cliente });
     } catch (error) {
+        console.error('Error en postCliente:', error); // VER logs completos en Render
         res.status(500).json({ mensaje: 'Internal server error' });
     }
 };
