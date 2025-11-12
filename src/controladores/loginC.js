@@ -22,6 +22,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ estado: 0, mensaje: 'Tipo de usuario inválido' });
     }
 
+    // 🔹 Buscar el usuario en la tabla de login correspondiente
     const [rows] = await conmysql.query(
       `SELECT * FROM ${tablaLogin} WHERE username = ?`,
       [username]
@@ -38,14 +39,14 @@ export const login = async (req, res) => {
       return res.status(401).json({ estado: 0, mensaje: 'Contraseña incorrecta' });
     }
 
-    // 🧠 Si es el admin especial:
-    if (username === 'admin') {
+    // 🧠 Si es el administrador global (usuario especial)
+    if (tipo === 'jardinero' && username === 'admin' && user.id_jardinero === 4) {
       const token = jwt.sign(
         {
-          id: 0,
+          id: 4,
           tipo: 'admin',
           nombre: 'Administrador General',
-          email: 'admin@app.com',
+          email: 'admin@gmail.com',
           isAdmin: true
         },
         JWT_SECRET,
@@ -57,15 +58,15 @@ export const login = async (req, res) => {
         mensaje: 'Login exitoso como administrador',
         token,
         usuario: {
-          id: 0,
+          id_jardinero: 4,
           nombre_completo: 'Administrador General',
-          email: 'admin@app.com',
+          email: 'admin@gmail.com',
           tipo: 'admin'
         }
       });
     }
 
-    // 🧾 Si es un usuario normal (cliente o jardinero)
+    // 🧾 Login normal (cliente o jardinero)
     const [info] = await conmysql.query(
       `SELECT * FROM ${tablaDatos} WHERE ${campoId} = ?`,
       [user[campoId]]
@@ -81,7 +82,7 @@ export const login = async (req, res) => {
         isAdmin: false
       },
       JWT_SECRET,
-      { expiresIn: '2h' }
+      { expiresIn: '2h' } // token válido por 2 horas
     );
 
     res.json({
