@@ -7,72 +7,70 @@ import crypto from 'crypto';
 // 🔐 LOGIN
 // ===============================
 export const login = async (req, res) => {
-  const { username, password, tipo } = req.body;
+  const { username, password } = req.body;
 
   try {
-    let tablaLogin, campoId, tablaDatos, campoNombre;
-
-    if (tipo === 'jardinero') {
-      tablaLogin = 'Login_Jardineros';
-      campoId = 'id_jardinero';
-      tablaDatos = 'Jardineros';
-      campoNombre = 'nombre_completo';
-    } else if (tipo === 'cliente') {
-      tablaLogin = 'Login_Clientes';
-      campoId = 'id_cliente';
-      tablaDatos = 'Clientes';
-      campoNombre = 'nombre_completo';
-    } else {
-      return res.status(400).json({ estado: 0, mensaje: 'Tipo de usuario inválido' });
-    }
-
-    // Buscar usuario en tabla correspondiente
-    const [rows] = await conmysql.query(
-      `SELECT * FROM ${tablaLogin} WHERE username = ?`,
+    // Buscar usuario en ambas tablas LOGIN
+    const [loginCliente] = await conmysql.query(
+      'SELECT *, "cliente" AS tipo FROM Login_Clientes WHERE username = ?',
       [username]
     );
 
-    if (rows.length === 0) {
-      return res.status(404).json({ estado: 0, mensaje: 'Usuario no encontrado' });
+    const [loginJardinero] = await conmysql.query(
+      'SELECT *, "jardinero" AS tipo FROM Login_Jardineros WHERE username = ?',
+      [username]
+    );
+
+    // Determinar tipo automáticamente
+    let user = null;
+
+    if (loginCliente.length > 0) user = loginCliente[0];
+    if (loginJardinero.length > 0) user = loginJardinero[0];
+
+    if (!user) {
+      return res.status(404).json({ estado: 0, mensaje: "Usuario no encontrado" });
     }
 
-    const user = rows[0];
-
-    // Comparar password
-    const hashIngresado = crypto.createHash('md5').update(password).digest('hex');
+    // Validar contraseña
+    const hashIngresado = crypto.createHash("md5").update(password).digest("hex");
     if (hashIngresado !== user.password_hash) {
-      return res.status(401).json({ estado: 0, mensaje: 'Contraseña incorrecta' });
+      return res.status(401).json({ estado: 0, mensaje: "Contraseña incorrecta" });
     }
 
-    // Obtener datos del usuario
+    // Obtener tabla de datos según el tipo
+    let tablaDatos = user.tipo === "cliente" ? "Clientes" : "Jardineros";
+    let campoId = user.tipo === "cliente" ? "id_cliente" : "id_jardinero";
+
     const [info] = await conmysql.query(
       `SELECT * FROM ${tablaDatos} WHERE ${campoId} = ?`,
       [user[campoId]]
     );
+
     const datos = info[0];
 
     // Crear token
     const token = jwt.sign(
       {
         id: datos[campoId],
-        tipo,
-        nombre: datos[campoNombre],
+        tipo: user.tipo,
+        nombre: datos.nombre_completo,
         email: datos.email
       },
       JWT_SECRET,
-      { expiresIn: '2h' }
+      { expiresIn: "2h" }
     );
 
     return res.json({
       estado: 1,
-      mensaje: 'Login exitoso',
+      mensaje: "Login exitoso",
+      tipo: user.tipo,
       token,
       usuario: datos
     });
 
   } catch (error) {
-    console.error('Error en login:', error);
-    return res.status(500).json({ estado: 0, mensaje: 'Internal server error' });
+    console.error("Error en login:", error);
+    return res.status(500).json({ estado: 0, mensaje: "Internal server error" });
   }
 };
 
