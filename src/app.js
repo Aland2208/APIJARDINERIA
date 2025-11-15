@@ -12,6 +12,7 @@ import citasRoutes from './routes/citas.routes.js';
 import galeriaRoutes from './routes/galeria.routes.js';
 import chatRoutes from './routes/chat.routes.js';
 import agendaVeriNotiRoutes from './routes/agendaVeriNoti.routes.js';
+import megustasRoutes from './routes/likes.routes.js';
 
 // ✅ Corrección de __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -43,6 +44,7 @@ app.use('/api', citasRoutes);
 app.use('/api', galeriaRoutes);
 app.use('/api', chatRoutes);
 app.use('/api', agendaVeriNotiRoutes);
+app.use('/api', megustasRoutes);
 
 // ✅ Ruta por defecto (404)
 app.use((req, res) => {
