@@ -21,6 +21,15 @@ export const getClienteById = async (req, res) => {
         res.status(500).json({ mensaje: 'Internal server error' });
     }
 };
+export const getClienteByIdLoginCli = async (req, res) => {
+    try {
+        const [result] = await conmysql.query('SELECT * FROM Login_Clientes WHERE id_cliente = ?', [req.params.id]);
+        if (result.length <= 0) return res.json({ cantidad: 0, mensaje: 'Cliente no encontrado' });
+        res.json({ cantidad: result.length, data: result[0] });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Internal server error' });
+    }
+};
 
 export const postCliente = async (req, res) => {
     try {
