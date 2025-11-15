@@ -76,4 +76,48 @@ export const cancelarCita = async (req, res) => {
     res.status(500).json({ mensaje: 'Internal server error' });
   }
 };
+  export const actualizarCita = async (req, res) => {
+    try {
+      const { id_cita } = req.params;
+      const { id_tipo_trabajo, ubicacion, referencia, observaciones, id_jardinero_asignado } = req.body;
+
+      if (!id_cita) {
+        return res.status(400).json({ mensaje: 'Se requiere id_cita' });
+      }
+
+      // Verificar si la cita existe
+      const [citas] = await conmysql.query(
+        'SELECT * FROM Citas WHERE id_cita = ?',
+        [id_cita]
+      );
+
+      if (citas.length === 0) {
+        return res.status(404).json({ mensaje: 'La cita no existe' });
+      }
+
+      // Actualizar los campos
+      await conmysql.query(
+        `UPDATE Citas 
+       SET id_tipo_trabajo = ?, 
+           ubicacion = ?, 
+           referencia = ?, 
+           observaciones = ?, 
+           id_jardinero_asignado = ? 
+       WHERE id_cita = ?`,
+        [
+          id_tipo_trabajo || citas[0].id_tipo_trabajo,
+          ubicacion || citas[0].ubicacion,
+          referencia || citas[0].referencia,
+          observaciones || citas[0].observaciones,
+          id_jardinero_asignado || citas[0].id_jardinero_asignado,
+          id_cita
+        ]
+      );
+
+      res.json({ mensaje: 'Cita actualizada exitosamente' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ mensaje: 'Internal server error' });
+    }
+  };
 
