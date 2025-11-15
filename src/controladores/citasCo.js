@@ -26,4 +26,22 @@ export const postCita = async (req, res) => {
     console.error(error);
     res.status(500).json({ mensaje: 'Internal server error' });
   }
-};
+}
+  export const getCitasPorCliente = async (req, res) => {
+    try {
+      const { id_cliente } = req.params; // obtenemos el id_cliente de la URL
+      if (!id_cliente) {
+        return res.status(400).json({ mensaje: 'Se requiere id_cliente' });
+      }
+
+      const [result] = await conmysql.query(
+        'SELECT * FROM Citas WHERE id_cliente = ?',
+        [id_cliente]
+      );
+
+      res.json({ cantidad: result.length, data: result });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ mensaje: 'Internal server error' });
+    }
+  };
