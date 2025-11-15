@@ -27,21 +27,53 @@ export const postCita = async (req, res) => {
     res.status(500).json({ mensaje: 'Internal server error' });
   }
 }
-  export const getCitasPorCliente = async (req, res) => {
-    try {
-      const { id_cliente } = req.params; // obtenemos el id_cliente de la URL
-      if (!id_cliente) {
-        return res.status(400).json({ mensaje: 'Se requiere id_cliente' });
-      }
-
-      const [result] = await conmysql.query(
-        'SELECT * FROM Citas WHERE id_cliente = ? and estado = "pendiente"',
-        [id_cliente]
-      );
-
-      res.json({ cantidad: result.length, data: result });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ mensaje: 'Internal server error' });
+export const getCitasPorCliente = async (req, res) => {
+  try {
+    const { id_cliente } = req.params; // obtenemos el id_cliente de la URL
+    if (!id_cliente) {
+      return res.status(400).json({ mensaje: 'Se requiere id_cliente' });
     }
-  };
+
+    const [result] = await conmysql.query(
+      'SELECT * FROM Citas WHERE id_cliente = ? and estado = "pendiente"',
+      [id_cliente]
+    );
+
+    res.json({ cantidad: result.length, data: result });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: 'Internal server error' });
+  }
+}
+// Cancelar cita por id
+export const cancelarCita = async (req, res) => {
+  try {
+    const { id_cita } = req.params;
+
+    if (!id_cita) {
+      return res.status(400).json({ mensaje: 'Se requiere id_cita' });
+    }
+
+    // Verificar si la cita existe y está pendiente
+    const [citas] = await conmysql.query(
+      'SELECT * FROM Citas WHERE id_cita = ? AND estado = "pendiente"',
+      [id_cita]
+    );
+
+    if (citas.length === 0) {
+      return res.status(404).json({ mensaje: 'La cita no existe o no se puede cancelar' });
+    }
+
+    // Actualizar estado a cancelada
+    await conmysql.query(
+      'UPDATE Citas SET estado = "cancelada" WHERE id_cita = ?',
+      [id_cita]
+    );
+
+    res.json({ mensaje: 'Cita cancelada exitosamente' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: 'Internal server error' });
+  }
+};
+
