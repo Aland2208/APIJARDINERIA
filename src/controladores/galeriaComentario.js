@@ -86,7 +86,6 @@ export const deleteGaleria = async (req, res) => {
     }
 };
 
-
 export const postComentario = async (req, res) => {
     try {
         const { id_galeria, id_cliente, mensaje, estrellas } = req.body;
@@ -101,6 +100,62 @@ export const postComentario = async (req, res) => {
 
     } catch (error) {
         console.error("Error en postComentario:", error);
+        res.status(500).json({ mensaje: 'Internal server error' });
+    }
+};
+
+export const putComentario = async (req, res) => {
+    try {
+        const { id } = req.params; // id_comentario
+        const { mensaje, estrellas } = req.body;
+
+        const [result] = await conmysql.query(
+            `UPDATE Comentarios_Galeria
+             SET mensaje = ?, estrellas = ?
+             WHERE id_comentario = ?`,
+            [mensaje, estrellas, id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ mensaje: 'Comentario no encontrado' });
+        }
+
+        const [fila] = await conmysql.query(
+            `SELECT * FROM Comentarios_Galeria WHERE id_comentario = ?`,
+            [id]
+        );
+
+        res.json({
+            mensaje: 'Comentario actualizado correctamente',
+            data: fila[0]
+        });
+
+    } catch (error) {
+        console.error("Error en putComentario:", error);
+        res.status(500).json({ mensaje: 'Internal server error' });
+    }
+};
+
+export const deleteComentario = async (req, res) => {
+    try {
+        const { id } = req.params; // id_comentario
+
+        const [result] = await conmysql.query(
+            `DELETE FROM Comentarios_Galeria WHERE id_comentario = ?`,
+            [id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ mensaje: 'Comentario no encontrado' });
+        }
+
+        res.json({
+            estado: 1,
+            mensaje: 'Comentario eliminado correctamente'
+        });
+
+    } catch (error) {
+        console.error("Error en deleteComentario:", error);
         res.status(500).json({ mensaje: 'Internal server error' });
     }
 };
