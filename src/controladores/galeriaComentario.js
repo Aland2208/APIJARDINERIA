@@ -88,7 +88,7 @@ export const deleteGaleria = async (req, res) => {
 
 export const getComentario = async (req, res) => {
     try {
-        const { id_galeria } = req.query;
+        const id_galeria = req.params.id; // 🔹 aquí usamos el parámetro de ruta
 
         if (!id_galeria) {
             return res.status(400).json({ mensaje: 'Falta id_galeria' });
