@@ -14,7 +14,7 @@ router.delete('/galeria/:id', verifyToken, deleteGaleria);
 
 //COMENTARIOS GALERÍA
 
-router.get('/galeria/comentarios', verifyToken, getComentario)
+router.get('/galeria/comentarios/comentario/:id', verifyToken, getComentario);
 router.post('/galeria/comentarios', verifyToken, postComentario);
 router.put('/galeria/comentarios/:id', verifyToken, putComentario);
 router.delete('/galeria/comentarios/:id', verifyToken, deleteComentario);

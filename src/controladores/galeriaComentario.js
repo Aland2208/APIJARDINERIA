@@ -88,9 +88,20 @@ export const deleteGaleria = async (req, res) => {
 
 export const getComentario = async (req, res) => {
     try {
-        const [result] = await conmysql.query('SELECT * FROM Comentarios_Galeria');
-        res.json({ cantidad: result.length, data: result });
+        const { id } = req.params;
+
+        const [result] = await conmysql.query('SELECT * FROM Comentarios_Galeria WHERE id_comentario=?', [id]);
+        if (result.length === 0) {
+            return res.status(404).json({ mensaje: 'Comentario no encontrado' });
+        }
+
+        res.json({
+            cantidad: result.length,
+            data: result[0]
+        });
+
     } catch (error) {
+        console.error("Error en getComentario:", error);
         res.status(500).json({ mensaje: 'Internal server error' });
     }
 };
