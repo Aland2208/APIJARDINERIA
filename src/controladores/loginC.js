@@ -3,14 +3,11 @@ import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../config.js';
 import crypto from 'crypto';
 
-// ===============================
-// 🔐 LOGIN
-// ===============================
+
 export const login = async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    // Buscar usuario en ambas tablas LOGIN
     const [loginCliente] = await conmysql.query(
       'SELECT *, "cliente" AS tipo FROM Login_Clientes WHERE username = ?',
       [username]
