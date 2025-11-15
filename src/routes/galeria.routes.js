@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { verifyToken } from '../middleware/verifyToken.js';
-import { getGaleria, getGaleriaById, postGaleria, deleteGaleria, postComentario, putComentario, deleteComentario } from '../controladores/galeriaComentario.js';
+import { getGaleria, getGaleriaById, postGaleria, deleteGaleria, getComentario, postComentario, putComentario, deleteComentario } from '../controladores/galeriaComentario.js';
 import upload from '../middleware/upload.js';
 
 const router = Router();
@@ -14,6 +14,7 @@ router.delete('/galeria/:id', verifyToken, deleteGaleria);
 
 //COMENTARIOS GALERÍA
 
+router.get('/galeria/comentarios', verifyToken, getComentario)
 router.post('/galeria/comentarios', verifyToken, postComentario);
 router.put('/galeria/comentarios/:id', verifyToken, putComentario);
 router.delete('/galeria/comentarios/:id', verifyToken, deleteComentario);
