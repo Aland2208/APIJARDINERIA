@@ -2,16 +2,16 @@ import { conmysql } from '../db.js';
 
 export const darLike = async (req, res) => {
   try {
-    const { username_cliente, id_galeria } = req.body;
+    const { id_login_cliente, id_galeria } = req.body;
 
-    if (!username_cliente || !id_galeria) {
+    if (!id_login_cliente || !id_galeria) {
       return res.status(400).json({ mensaje: "Faltan datos requeridos" });
     }
 
-    // Intentar insertar el like ( UNIQUE evitará duplicados )
+    // Insertar like (UNIQUE evita duplicados)
     await conmysql.query(
-      `INSERT INTO Me_Gustas (username_cliente, id_galeria) VALUES (?, ?)`,
-      [username_cliente, id_galeria]
+      `INSERT INTO Me_Gustas (id_login_cliente, id_galeria) VALUES (?, ?)`,
+      [id_login_cliente, id_galeria]
     );
 
     res.json({
@@ -20,7 +20,6 @@ export const darLike = async (req, res) => {
     });
 
   } catch (error) {
-    // Error por like duplicado
     if (error.code === "ER_DUP_ENTRY") {
       return res.status(409).json({ mensaje: "El usuario ya dio like a esta foto" });
     }
@@ -30,13 +29,15 @@ export const darLike = async (req, res) => {
   }
 };
 
+
 export const quitarLike = async (req, res) => {
   try {
-    const { username_cliente, id_galeria } = req.body;
+    const { id_login_cliente, id_galeria } = req.body;
 
     const [result] = await conmysql.query(
-      `DELETE FROM Me_Gustas WHERE username_cliente = ? AND id_galeria = ?`,
-      [username_cliente, id_galeria]
+      `DELETE FROM Me_Gustas 
+       WHERE id_login_cliente = ? AND id_galeria = ?`,
+      [id_login_cliente, id_galeria]
     );
 
     if (result.affectedRows === 0) {
@@ -51,12 +52,15 @@ export const quitarLike = async (req, res) => {
   }
 };
 
+
 export const contarLikes = async (req, res) => {
   try {
     const { id_galeria } = req.params;
 
     const [rows] = await conmysql.query(
-      `SELECT COUNT(*) AS likes FROM Me_Gustas WHERE id_galeria = ?`,
+      `SELECT COUNT(*) AS likes 
+       FROM Me_Gustas 
+       WHERE id_galeria = ?`,
       [id_galeria]
     );
 
@@ -71,11 +75,13 @@ export const contarLikes = async (req, res) => {
 
 export const verificarLike = async (req, res) => {
   try {
-    const { username_cliente, id_galeria } = req.body;
+    const { id_login_cliente, id_galeria } = req.body;
 
     const [rows] = await conmysql.query(
-      `SELECT 1 FROM Me_Gustas WHERE username_cliente = ? AND id_galeria = ?`,
-      [username_cliente, id_galeria]
+      `SELECT 1 
+       FROM Me_Gustas 
+       WHERE id_login_cliente = ? AND id_galeria = ?`,
+      [id_login_cliente, id_galeria]
     );
 
     res.json({
