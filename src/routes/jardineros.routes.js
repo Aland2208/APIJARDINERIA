@@ -9,6 +9,6 @@ router.get('/jardineros/:id', verifyToken, getJardineroById);
 router.post('/jardineros', postJardinero);
 router.put('/jardineros/:id', verifyToken, putJardinero);
 router.delete('/jardineros/:id', verifyToken, deleteJardinero);
-router.get('/jardineros/:telefono', getJardineroTelefono);
+router.get('/jardinerosTelf/:telefono', getJardineroTelefono);
 
 export default router;
