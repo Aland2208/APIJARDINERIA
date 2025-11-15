@@ -35,7 +35,7 @@ export const postCita = async (req, res) => {
       }
 
       const [result] = await conmysql.query(
-        'SELECT * FROM Citas WHERE id_cliente = ?',
+        'SELECT * FROM Citas WHERE id_cliente = ? and estado = "pendiente"',
         [id_cliente]
       );
 
