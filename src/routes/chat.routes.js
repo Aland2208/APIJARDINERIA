@@ -8,7 +8,6 @@ const router = Router();
 router.get('/chats', verifyToken, getChats);
 router.post('/mensajes', verifyToken, upload.single('imagen'), postMensaje);
 router.post('/chats', verifyToken, crearChat);
-router.get('/mensajes/:id_chat', verifyToken, getMensajesByChat);
 router.get('/mensajes/cliente/:id_cliente', verifyToken, getMensajesByCliente);
-
+router.get('/mensajes/:id_chat', verifyToken, getMensajesByChat);
 export default router;
