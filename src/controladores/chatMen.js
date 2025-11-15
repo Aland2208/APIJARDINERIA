@@ -12,6 +12,47 @@ export const getChats = async (req, res) => {
     }
 };
 
+export const crearChat = async (req, res) => {
+    try {
+        const { id_cita } = req.body;
+
+        const cita =  null;
+
+        const [result] = await conmysql.query(
+            "INSERT INTO Chats(id_cita, creado_en) VALUES (?, NOW())",
+            [cita]
+        );
+
+        res.json({
+            mensaje: "Chat creado correctamente",
+            id_chat: result.insertId
+        });
+
+    } catch (error) {
+        console.error("Error al crear chat:", error);
+        res.status(500).json({ mensaje: "Internal server error" });
+    }
+};
+export const getMensajesByChat = async (req, res) => {
+    try {
+        const { id_chat } = req.params;
+
+        const [result] = await conmysql.query(
+            "SELECT * FROM Mensajes WHERE id_chat = ? ORDER BY fecha ASC",
+            [id_chat]
+        );
+
+        res.json({
+            cantidad: result.length,
+            data: result
+        });
+
+    } catch (error) {
+        console.error("Error al obtener mensajes:", error);
+        res.status(500).json({ mensaje: "Internal server error" });
+    }
+};
+
 export const postMensaje = async (req, res) => {
     try {
         const { id_chat, id_emisor_jardinero, id_emisor_cliente, mensaje } = req.body;
