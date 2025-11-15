@@ -14,13 +14,16 @@ export const getCitas = async (req, res) => {
 
 export const postCita = async (req, res) => {
   try {
-    const { id_cliente, id_tipo_trabajo, ubicacion, referencia, observaciones } = req.body;
+    const { id_cliente, id_tipo_trabajo, ubicacion, referencia, observaciones, id_jardinero_asignado } = req.body;
+
     const [result] = await conmysql.query(
-      'INSERT INTO Citas(id_cliente, id_tipo_trabajo, ubicacion, referencia, observaciones) VALUES (?,?,?,?,?)',
-      [id_cliente, id_tipo_trabajo, ubicacion, referencia, observaciones]
+      'INSERT INTO Citas(id_cliente, id_tipo_trabajo, ubicacion, referencia, observaciones, id_jardinero_asignado) VALUES (?,?,?,?,?,?)',
+      [id_cliente, id_tipo_trabajo, ubicacion, referencia, observaciones, id_jardinero_asignado || null]
     );
+
     res.json({ mensaje: 'Cita registrada exitosamente', id_cita: result.insertId });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ mensaje: 'Internal server error' });
   }
 };
