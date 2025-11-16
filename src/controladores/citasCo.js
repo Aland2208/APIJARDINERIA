@@ -66,7 +66,7 @@ export const cancelarCita = async (req, res) => {
 
     // Actualizar estado a cancelada
     await conmysql.query(
-      'UPDATE Citas SET estado = "cancelada" WHERE id_cita = ?',
+      'UPDATE Citas SET estado = "rechazada" WHERE id_cita = ?',
       [id_cita]
     );
 
