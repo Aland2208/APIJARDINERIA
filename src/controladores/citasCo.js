@@ -120,6 +120,42 @@ export const actualizarCita = async (req, res) => {
     res.status(500).json({ mensaje: 'Internal server error' });
   }
 };
+export const getCitasPorJardinero = async (req, res) => {
+  try {
+    const { id_jardinero } = req.params; // Obtenemos el id del jardinero de la URL
+    if (!id_jardinero) {
+      return res.status(400).json({ mensaje: 'Se requiere id_jardinero' });
+    }
 
+    // Traemos solo citas pendientes asignadas al jardinero
+    const [result] = await conmysql.query(
+      'SELECT * FROM Citas WHERE id_jardinero_asignado = ? AND estado = "pendiente"',
+      [id_jardinero]
+    );
+
+    res.json({ cantidad: result.length, data: result });
+  } catch (error) {
+    console.error('Error en getCitasPorJardinero:', error);
+    res.status(500).json({ mensaje: 'Internal server error' });
+  }
+};
+ export const getCitasPorJardineroConf = async (req, res) => {
+  try {
+    const { id_jardinero } = req.params; // Obtenemos el id del jardinero de la URL
+    if (!id_jardinero) {
+      return res.status(400).json({ mensaje: 'Se requiere id_jardinero' });
+    }
+
+    const [result] = await conmysql.query(
+      'SELECT * FROM Citas WHERE id_jardinero_asignado = ? AND estado = "aceptada"',
+      [id_jardinero]
+    );
+
+    res.json({ cantidad: result.length, data: result });
+  } catch (error) {
+    console.error('Error en getCitasPorJardinero:', error);
+    res.status(500).json({ mensaje: 'Internal server error' });
+  }
+};
 
 
