@@ -1,9 +1,7 @@
-export const permitirRol = (rolRequerido) => {
-  return (req, res, next) => {
-    const { tipo } = req.usuario; // viene del token
-    if (tipo !== rolRequerido) {
-      return res.status(403).json({ mensaje: 'Acceso denegado' });
-    }
-    next();
-  };
+export const permitirRol = (...rolesPermitidos) => (req, res, next) => {
+  const { rol } = req.usuario; // se supone que verifyToken agrega `req.usuario`
+  if (!rolesPermitidos.includes(rol)) {
+    return res.status(403).json({ mensaje: 'No tienes permisos' });
+  }
+  next();
 };
