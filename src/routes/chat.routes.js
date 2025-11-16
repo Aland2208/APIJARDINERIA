@@ -9,6 +9,6 @@ router.get('/chats', verifyToken, getChats);
 router.post('/mensajes', verifyToken, upload.single('imagen'), postMensaje);
 router.post('/chats', verifyToken, crearChat);
 router.get('/mensajes/cliente/:id_cliente', verifyToken, getMensajesByCliente);
-router.get('/mensajes/jardineros/:id_cliente', verifyToken, getMensajesByJardinero);
+router.get('/mensajes/jardineros/:id_jardinero', verifyToken, getMensajesByJardinero);
 router.get('/mensajes/:id_chat', verifyToken, getMensajesByChat);
 export default router;
