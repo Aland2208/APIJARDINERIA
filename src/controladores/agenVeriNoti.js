@@ -53,3 +53,26 @@ export const postNotificacion = async (req, res) => {
         res.status(500).json({ mensaje: 'Internal server error' });
     }
 };
+export const validarAgenda = async (req, res) => {
+    try {
+        const { id_jardinero, fecha, hora } = req.body;
+
+        const [result] = await conmysql.query(`
+            SELECT a.id_agenda
+            FROM Agenda a
+            INNER JOIN Citas c ON a.id_cita = c.id_cita
+            WHERE c.id_jardinero_asignado = ?
+              AND a.fecha = ?
+              AND a.hora = ?
+              AND a.estado IN ('pendiente', 'confirmada')
+        `, [id_jardinero, fecha, hora]);
+
+        if (result.length > 0) {
+            return res.status(400).json({ mensaje: 'El jardinero ya tiene una cita en esa fecha y hora' });
+        }
+
+        res.json({ mensaje: 'No hay conflictos en la agenda' });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error validando agenda', error });
+    }
+};
