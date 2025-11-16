@@ -56,7 +56,7 @@ export const cancelarCita = async (req, res) => {
 
     // Verificar si la cita existe y está pendiente
     const [citas] = await conmysql.query(
-      'SELECT * FROM Citas WHERE id_cita = ? AND estado = "pendiente"',
+      'SELECT * FROM Citas WHERE id_cita = ? AND estado = "pendiente" OR estado = "aceptada"',
       [id_cita]
     );
 
