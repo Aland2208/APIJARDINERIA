@@ -76,86 +76,50 @@ export const cancelarCita = async (req, res) => {
     res.status(500).json({ mensaje: 'Internal server error' });
   }
 };
-  export const actualizarCita = async (req, res) => {
-    try {
-      const { id_cita } = req.params;
-      const { id_tipo_trabajo, ubicacion, referencia, observaciones, id_jardinero_asignado } = req.body;
+export const actualizarCita = async (req, res) => {
+  try {
+    const { id_cita } = req.params;
+    const { id_tipo_trabajo, ubicacion, referencia, observaciones, id_jardinero_asignado, estado } = req.body;
 
-      if (!id_cita) {
-        return res.status(400).json({ mensaje: 'Se requiere id_cita' });
-      }
+    if (!id_cita) {
+      return res.status(400).json({ mensaje: 'Se requiere id_cita' });
+    }
 
-      // Verificar si la cita existe
-      const [citas] = await conmysql.query(
-        'SELECT * FROM Citas WHERE id_cita = ?',
-        [id_cita]
-      );
+    const [citas] = await conmysql.query(
+      'SELECT * FROM Citas WHERE id_cita = ?',
+      [id_cita]
+    );
 
-      if (citas.length === 0) {
-        return res.status(404).json({ mensaje: 'La cita no existe' });
-      }
+    if (citas.length === 0) {
+      return res.status(404).json({ mensaje: 'La cita no existe' });
+    }
 
-      // Actualizar los campos
-      await conmysql.query(
-        `UPDATE Citas 
+    await conmysql.query(
+      `UPDATE Citas
        SET id_tipo_trabajo = ?, 
            ubicacion = ?, 
            referencia = ?, 
            observaciones = ?, 
-           id_jardinero_asignado = ? 
+           id_jardinero_asignado = ?,
+           estado = ?
        WHERE id_cita = ?`,
-        [
-          id_tipo_trabajo || citas[0].id_tipo_trabajo,
-          ubicacion || citas[0].ubicacion,
-          referencia || citas[0].referencia,
-          observaciones || citas[0].observaciones,
-          id_jardinero_asignado || citas[0].id_jardinero_asignado,
-          id_cita
-        ]
-      );
-
-      res.json({ mensaje: 'Cita actualizada exitosamente' });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ mensaje: 'Internal server error' });
-    }
-  };
-export const getCitasPorJardinero = async (req, res) => {
-  try {
-    const { id_jardinero } = req.params; // Obtenemos el id del jardinero de la URL
-    if (!id_jardinero) {
-      return res.status(400).json({ mensaje: 'Se requiere id_jardinero' });
-    }
-
-    // Traemos solo citas pendientes asignadas al jardinero
-    const [result] = await conmysql.query(
-      'SELECT * FROM Citas WHERE id_jardinero_asignado = ? AND estado = "pendiente"',
-      [id_jardinero]
+      [
+        id_tipo_trabajo || citas[0].id_tipo_trabajo,
+        ubicacion || citas[0].ubicacion,
+        referencia || citas[0].referencia,
+        observaciones || citas[0].observaciones,
+        id_jardinero_asignado || citas[0].id_jardinero_asignado,
+        estado || citas[0].estado,
+        id_cita
+      ]
     );
 
-    res.json({ cantidad: result.length, data: result });
+    res.json({ mensaje: 'Cita actualizada exitosamente' });
   } catch (error) {
-    console.error('Error en getCitasPorJardinero:', error);
+    console.error(error);
     res.status(500).json({ mensaje: 'Internal server error' });
   }
 };
-;export const getCitasPorJardineroConf = async (req, res) => {
-  try {
-    const { id_jardinero } = req.params; // Obtenemos el id del jardinero de la URL
-    if (!id_jardinero) {
-      return res.status(400).json({ mensaje: 'Se requiere id_jardinero' });
-    }
 
-    const [result] = await conmysql.query(
-      'SELECT * FROM Citas WHERE id_jardinero_asignado = ? AND estado = "aceptada"',
-      [id_jardinero]
-    );
-
-    res.json({ cantidad: result.length, data: result });
-  } catch (error) {
-    console.error('Error en getCitasPorJardinero:', error);
-    res.status(500).json({ mensaje: 'Internal server error' });
-  }
-};
 
 
