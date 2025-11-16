@@ -115,4 +115,46 @@ export const getMensajesByCliente = async (req, res) => {
         res.status(500).json({ mensaje: "Internal server error" });
     }
 };
+export const getMensajesByJardinero = async (req, res) => {
+    try {
+        const { id_jardinero } = req.params;
 
+        if (!id_jardinero) {
+            return res.status(400).json({ mensaje: "Falta el parámetro id_jardinero" });
+        }
+        const [mensajes] = await conmysql.query(
+            "SELECT * FROM Mensajes WHERE id_emisor_jardinero = ? ORDER BY fecha ASC",
+            [id_jardinero]
+        );
+
+        if (mensajes.length === 0) {
+            return res.json({
+                mensaje: "El jardinero no tiene mensajes enviados",
+                cantidad: 0,
+                data: []
+            });
+        }
+
+        const idChats = [...new Set(mensajes.map(m => m.id_chat))];
+
+        const [chats] = await conmysql.query(
+            `SELECT * FROM Chats WHERE id_chat IN (${idChats.map(() => "?").join(",")})`,
+            idChats
+        );
+
+        const data = chats.map(chat => ({
+            chat,
+            mensajes: mensajes.filter(m => m.id_chat === chat.id_chat)
+        }));
+
+        res.json({
+            mensaje: "Datos recuperados",
+            cantidad: data.length,
+            data
+        });
+
+    } catch (error) {
+        console.error("Error al obtener mensajes del jardinero:", error);
+        res.status(500).json({ mensaje: "Internal server error" });
+    }
+};
