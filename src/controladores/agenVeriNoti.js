@@ -136,3 +136,26 @@ export const updateAgendaPorCita = async (req, res) => {
         res.status(500).json({ mensaje: 'Error interno al actualizar agenda' });
     }
 };
+export const getAgendaPorCitaEstado = async (req, res) => {
+    try {
+        const { id_cita } = req.params;
+
+        if (!id_cita) {
+            return res.status(400).json({ mensaje: 'Se requiere id_cita' });
+        }
+
+        const [result] = await conmysql.query(
+            'SELECT * FROM Agenda WHERE id_cita = ? and estado = "completada"',
+            [id_cita]
+        );
+
+        if (result.length === 0) {
+            return res.status(404).json({ mensaje: 'No se encontró agenda para esta cita' });
+        }
+
+        res.json({ cantidad: result.length, data: result });
+    } catch (error) {
+        console.error('Error en getAgendaPorCita:', error);
+        res.status(500).json({ mensaje: 'Error interno al obtener agenda' });
+    }
+};
