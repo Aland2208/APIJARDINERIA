@@ -27,19 +27,40 @@ export const postAgenda = async (req, res) => {
         res.status(500).json({ mensaje: 'Internal server error' });
     }
 };
-
 export const postVerificacion = async (req, res) => {
     try {
         const { id_cita, id_jardinero, estado, observaciones, precio_final, fecha_verificacion, hora } = req.body;
+
+        // Mostrar los datos recibidos
+        console.log('Datos recibidos para verificación:', req.body);
+
         const [result] = await conmysql.query(
-            'INSERT INTO Verificaciones(id_agenda, id_jardinero, estado, observaciones, precio_final,fecha_verificacion,hora) VALUES (?,?,?,?,?,?,?)',
-            [id_cita, id_jardinero, estado, observaciones, precio_final, fecha_verificacion, hora]
+            'INSERT INTO Verificaciones(id_agenda, id_jardinero, estado, observaciones, precio_final, fecha_verificacion, hora) VALUES (?,?,?,?,?,?,?)',
+            [
+                id_cita,
+                id_jardinero,
+                estado,
+                observaciones || null,      // asegurar que no sea undefined
+                precio_final || 0,          // valor por defecto si es undefined
+                fecha_verificacion,
+                hora
+            ]
         );
+
         res.json({ mensaje: 'Verificación registrada', id_verificacion: result.insertId });
     } catch (error) {
-        res.status(500).json({ mensaje: 'Internal server error' });
+        // Mostrar el error completo en consola
+        console.error('Error al registrar verificación:', error);
+
+        // Enviar mensaje de error más detallado al cliente
+        res.status(500).json({
+            mensaje: 'Internal server error',
+            error: error.message,
+            stack: error.stack
+        });
     }
 };
+
 
 export const postNotificacion = async (req, res) => {
     try {
@@ -171,7 +192,7 @@ export const getNotificacionesPorJardinero = async (req, res) => {
 
         const notificaciones = agendas.map(a => ({
             id_cita: a.id_cita,
-            id_agenda: a.id_agenda,       
+            id_agenda: a.id_agenda,
             estado: a.estado,
             ubicacion: a.ubicacion,
             referencia: a.referencia,
