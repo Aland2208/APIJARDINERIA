@@ -146,8 +146,7 @@ export const getNotificacionesPorJardinero = async (req, res) => {
 
         const [citas] = await conmysql.query(
             `
-            SELECT id_cita, ubicacion, referencia, fecha_creacion
-            FROM Cita
+            SELECT *FROM Citas
             WHERE id_jardinero_asignado = ? 
               AND estado = 'aceptada'
             `,
@@ -164,8 +163,8 @@ export const getNotificacionesPorJardinero = async (req, res) => {
             `
             SELECT A.*, C.ubicacion, C.referencia
             FROM Agenda A
-            INNER JOIN Cita C ON C.id_cita = A.id_cita
-            WHERE A.id_cita IN (?)
+            INNER JOIN Citas C ON C.id_cita = A.id_cita
+            WHERE A.id_cita IN (?) and A.estado='completada"
             ORDER BY A.fecha DESC, A.hora DESC
             `,
             [ids]
