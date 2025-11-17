@@ -31,8 +31,6 @@ export const postVerificacion = async (req, res) => {
     try {
         const { id_agenda, id_jardinero, estado, observaciones, precio_final, fecha_verificacion, hora } = req.body;
 
-        // Mostrar los datos recibidos
-        console.log('Datos recibidos para verificación:', req.body);
 
         const [result] = await conmysql.query(
             'INSERT INTO Verificaciones(id_agenda, id_jardinero, estado, observaciones, precio_final, fecha_verificacion, hora) VALUES (?,?,?,?,?,?,?)',
@@ -40,8 +38,8 @@ export const postVerificacion = async (req, res) => {
                 id_agenda,
                 id_jardinero,
                 estado,
-                observaciones || null,      // asegurar que no sea undefined
-                precio_final || 0,          // valor por defecto si es undefined
+                observaciones || null,     
+                precio_final || 0,          
                 fecha_verificacion,
                 hora
             ]
@@ -66,7 +64,7 @@ export const postNotificacion = async (req, res) => {
     try {
         const { id_jardinero, id_cliente, id_cita, mensaje } = req.body;
         const [result] = await conmysql.query(
-            'INSERT INTO Notificaciones(id_jardinero, id_cliente, id_cita, mensaje) VALUES (?,?,?,?)',
+            'INSERT INTO Notificaciones(id_jardinero, id_cliente, id_agenda, mensaje) VALUES (?,?,?,?)',
             [id_jardinero, id_cliente, id_cita, mensaje]
         );
         res.json({ mensaje: 'Notificación creada', id_notificacion: result.insertId });
@@ -207,4 +205,66 @@ export const getNotificacionesPorJardinero = async (req, res) => {
         console.error("Error en getNotificacionesPorJardinero:", error);
         res.status(500).json({ mensaje: "Error interno al obtener notificaciones" });
     }
+
+};
+
+export const getEnviosPorCliente = async (req, res) => {
+  try {
+    const { id_cliente } = req.params;
+    const [rows] = await conmysql.query(
+      'SELECT * FROM Notificaciones WHERE id_cliente = ? ORDER BY fecha DESC',
+      [id_cliente]
+    );
+    res.json({ data: rows });
+  } catch (error) {
+    console.error('Error obteniendo envíos por cliente:', error);
+    res.status(500).json({ mensaje: 'Internal server error', error: error.message });
+  }
+};
+export const getEnviosPorJardinero = async (req, res) => {
+  try {
+    const { id_jardinero } = req.params;
+    const [rows] = await conmysql.query(
+      'SELECT * FROM Notificaciones WHERE id_jardinero = ? ORDER BY fecha DESC',
+      [id_jardinero]
+    );
+    res.json({ data: rows });
+  } catch (error) {
+    console.error('Error obteniendo envíos por jardinero:', error);
+    res.status(500).json({ mensaje: 'Internal server error', error: error.message });
+  }
+};
+export const postEnvio = async (req, res) => {
+  try {
+    const { id_jardinero, id_cliente, id_agenda, mensaje, fecha, leido } = req.body;
+
+    const [result] = await conmysql.query(
+      'INSERT INTO Notificaciones(id_jardinero, id_cliente, id_agenda, mensaje, fecha, leido) VALUES (?,?,?,?,?,?)',
+      [id_jardinero || null, id_cliente || null, id_agenda || null, mensaje, fecha, leido || 0]
+    );
+
+    res.json({ mensaje: 'Envío creado', id_notificacion: result.insertId });
+  } catch (error) {
+    console.error('Error creando envío:', error);
+    res.status(500).json({ mensaje: 'Internal server error', error: error.message });
+  }
+};
+export const deleteEnvio = async (req, res) => {
+  try {
+    const { id_notificacion } = req.params;
+
+    const [result] = await conmysql.query(
+      'DELETE FROM Notificaciones WHERE id_notificacion = ?',
+      [id_notificacion]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ mensaje: 'Envío no encontrado' });
+    }
+
+    res.json({ mensaje: 'Envío eliminado' });
+  } catch (error) {
+    console.error('Error eliminando envío:', error);
+    res.status(500).json({ mensaje: 'Internal server error', error: error.message });
+  }
 };
