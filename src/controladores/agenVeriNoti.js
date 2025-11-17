@@ -7,7 +7,7 @@ export const getVerificaciones = async (req, res) => {
              j.nombre_completo AS jardinero
       FROM Verificaciones v
       INNER JOIN Jardineros j ON v.id_jardinero = j.id_jardinero
-      INNER JOIN Citas c ON v.id_cita = c.id_cita
+      INNER JOIN Citas c ON v.id_agenda = c.id_cita
     `);
         res.json(result);
     } catch (error) {
@@ -32,7 +32,7 @@ export const postVerificacion = async (req, res) => {
     try {
         const { id_cita, id_jardinero, estado, observaciones, precio_final,fecha_verificacion, hora} = req.body;
         const [result] = await conmysql.query(
-            'INSERT INTO Verificaciones(id_cita, id_jardinero, estado, observaciones, precio_final,fecha_verificacion,hora) VALUES (?,?,?,?,?,?,?)',
+            'INSERT INTO Verificaciones(id_agenda, id_jardinero, estado, observaciones, precio_final,fecha_verificacion,hora) VALUES (?,?,?,?,?,?,?)',
             [id_cita, id_jardinero, estado, observaciones, precio_final,fecha_verificacion, hora]
         );
         res.json({ mensaje: 'Verificación registrada', id_verificacion: result.insertId });
