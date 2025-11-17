@@ -4,7 +4,7 @@ import {
     postAgenda, postVerificacion, postNotificacion, getVerificaciones, validarAgenda, getAgendaPorCita, updateAgendaPorCita, getNotificacionesPorJardinero, getEnviosPorCliente,
     getEnviosPorJardinero,
     postEnvio,
-    deleteEnvio
+    deleteEnvio,getClientePorAgendaenCitas
 } from '../controladores/agenVeriNoti.js';
 import { permitirRol } from '../middleware/roles.js';
 
@@ -22,4 +22,6 @@ router.get('/Envio/:id_cliente', getEnviosPorCliente);
 router.get('/EnvioJar/:id_jardinero', getEnviosPorJardinero);
 router.post('/Envio', postEnvio);
 router.delete('/Envio/:id_notificacion', deleteEnvio);
+router.get('/agenda/:id_agenda/cliente', getClientePorAgendaenCitas);
+
 export default router;

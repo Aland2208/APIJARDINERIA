@@ -268,3 +268,41 @@ export const deleteEnvio = async (req, res) => {
     res.status(500).json({ mensaje: 'Internal server error', error: error.message });
   }
 };
+
+export const getClientePorAgendaenCitas = async (req, res) => {
+  try {
+    const { id_agenda } = req.params;
+
+    if (!id_agenda) {
+      return res.status(400).json({ mensaje: 'Se requiere id_agenda' });
+    }
+
+    const [agendaRows] = await conmysql.query(
+      'SELECT id_cita FROM Agenda WHERE id_agenda = ?',
+      [id_agenda]
+    );
+
+    if (agendaRows.length === 0) {
+      return res.status(404).json({ mensaje: 'No se encontró agenda con ese id' });
+    }
+
+    const id_cita = agendaRows[0].id_cita;
+
+    const [citaRows] = await conmysql.query(
+      'SELECT id_cliente FROM Citas WHERE id_cita = ?',
+      [id_cita]
+    );
+
+    if (citaRows.length === 0) {
+      return res.status(404).json({ mensaje: 'No se encontró cita asociada a esta agenda' });
+    }
+
+    const id_cliente = citaRows[0].id_cliente;
+
+    res.json({ id_cliente, id_cita, id_agenda });
+    
+  } catch (error) {
+    console.error('Error en getClientePorAgenda:', error);
+    res.status(500).json({ mensaje: 'Error interno al obtener cliente', error: error.message });
+  }
+};
