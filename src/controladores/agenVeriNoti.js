@@ -145,11 +145,9 @@ export const getNotificacionesPorJardinero = async (req, res) => {
         }
 
         const [citas] = await conmysql.query(
-            `
-            SELECT *FROM Citas
-            WHERE id_jardinero_asignado = ? 
-              AND estado = 'aceptada'
-            `,
+            `SELECT * FROM Citas 
+             WHERE id_jardinero_asignado = ? 
+               AND estado = 'aceptada'`,
             [id_jardinero]
         );
 
@@ -164,7 +162,8 @@ export const getNotificacionesPorJardinero = async (req, res) => {
             SELECT A.*, C.ubicacion, C.referencia
             FROM Agenda A
             INNER JOIN Citas C ON C.id_cita = A.id_cita
-            WHERE A.id_cita IN (?) and A.estado='completada"
+            WHERE A.id_cita IN (?)
+              AND A.estado='completada'
             ORDER BY A.fecha DESC, A.hora DESC
             `,
             [ids]
@@ -172,17 +171,12 @@ export const getNotificacionesPorJardinero = async (req, res) => {
 
         const notificaciones = agendas.map(a => ({
             id_cita: a.id_cita,
-            estado: a.estado,         
+            estado: a.estado,
             ubicacion: a.ubicacion,
             referencia: a.referencia,
             fecha: a.fecha,
             hora: a.hora,
-            descripcion:
-                a.estado === "completada"
-                    ? "Visita completada."
-                    : a.estado === "cancelada"
-                    ? "La visita fue cancelada."
-                    : "Tienes una visita pendiente."
+            descripcion: "Visita completada."
         }));
 
         res.json({ cantidad: notificaciones.length, notificaciones });
