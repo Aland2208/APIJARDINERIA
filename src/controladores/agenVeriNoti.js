@@ -136,26 +136,60 @@ export const updateAgendaPorCita = async (req, res) => {
         res.status(500).json({ mensaje: 'Error interno al actualizar agenda' });
     }
 };
-export const getAgendaPorCitaEstado = async (req, res) => {
+export const getNotificacionesPorJardinero = async (req, res) => {
     try {
-        const { id_cita } = req.params;
+        const { id_jardinero } = req.params;
 
-        if (!id_cita) {
-            return res.status(400).json({ mensaje: 'Se requiere id_cita' });
+        if (!id_jardinero) {
+            return res.status(400).json({ mensaje: 'Se requiere id_jardinero' });
         }
 
-        const [result] = await conmysql.query(
-            'SELECT * FROM Agenda WHERE id_cita = ? and estado = "completada"',
-            [id_cita]
+        const [citas] = await conmysql.query(
+            `
+            SELECT id_cita, ubicacion, referencia, fecha_creacion
+            FROM Cita
+            WHERE id_jardinero_asignado = ? 
+              AND estado = 'aceptada'
+            `,
+            [id_jardinero]
         );
 
-        if (result.length === 0) {
-            return res.status(404).json({ mensaje: 'No se encontró agenda para esta cita' });
+        if (citas.length === 0) {
+            return res.json({ mensaje: "No hay citas aceptadas", notificaciones: [] });
         }
 
-        res.json({ cantidad: result.length, data: result });
+        const ids = citas.map(c => c.id_cita);
+
+        const [agendas] = await conmysql.query(
+            `
+            SELECT A.*, C.ubicacion, C.referencia
+            FROM Agenda A
+            INNER JOIN Cita C ON C.id_cita = A.id_cita
+            WHERE A.id_cita IN (?)
+            ORDER BY A.fecha DESC, A.hora DESC
+            `,
+            [ids]
+        );
+
+        const notificaciones = agendas.map(a => ({
+            id_cita: a.id_cita,
+            estado: a.estado,         
+            ubicacion: a.ubicacion,
+            referencia: a.referencia,
+            fecha: a.fecha,
+            hora: a.hora,
+            descripcion:
+                a.estado === "completada"
+                    ? "Visita completada."
+                    : a.estado === "cancelada"
+                    ? "La visita fue cancelada."
+                    : "Tienes una visita pendiente."
+        }));
+
+        res.json({ cantidad: notificaciones.length, notificaciones });
+
     } catch (error) {
-        console.error('Error en getAgendaPorCita:', error);
-        res.status(500).json({ mensaje: 'Error interno al obtener agenda' });
+        console.error("Error en getNotificacionesPorJardinero:", error);
+        res.status(500).json({ mensaje: "Error interno al obtener notificaciones" });
     }
 };
