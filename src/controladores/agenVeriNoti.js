@@ -29,7 +29,7 @@ export const postAgenda = async (req, res) => {
 };
 export const postVerificacion = async (req, res) => {
     try {
-        const { id_cita, id_jardinero, estado, observaciones, precio_final, fecha_verificacion, hora } = req.body;
+        const { id_agenda, id_jardinero, estado, observaciones, precio_final, fecha_verificacion, hora } = req.body;
 
         // Mostrar los datos recibidos
         console.log('Datos recibidos para verificación:', req.body);
@@ -37,7 +37,7 @@ export const postVerificacion = async (req, res) => {
         const [result] = await conmysql.query(
             'INSERT INTO Verificaciones(id_agenda, id_jardinero, estado, observaciones, precio_final, fecha_verificacion, hora) VALUES (?,?,?,?,?,?,?)',
             [
-                id_cita,
+                id_agenda,
                 id_jardinero,
                 estado,
                 observaciones || null,      // asegurar que no sea undefined
