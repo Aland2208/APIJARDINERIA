@@ -30,10 +30,10 @@ export const postAgenda = async (req, res) => {
 
 export const postVerificacion = async (req, res) => {
     try {
-        const { id_cita, id_jardinero, estado, observaciones, precio_final } = req.body;
+        const { id_cita, id_jardinero, estado, observaciones, precio_final,fecha_verificacion, hora} = req.body;
         const [result] = await conmysql.query(
-            'INSERT INTO Verificaciones(id_cita, id_jardinero, estado, observaciones, precio_final) VALUES (?,?,?,?,?)',
-            [id_cita, id_jardinero, estado, observaciones, precio_final]
+            'INSERT INTO Verificaciones(id_cita, id_jardinero, estado, observaciones, precio_final,fecha_verificacion,hora) VALUES (?,?,?,?,?,?,?)',
+            [id_cita, id_jardinero, estado, observaciones, precio_final,fecha_verificacion, hora]
         );
         res.json({ mensaje: 'Verificación registrada', id_verificacion: result.insertId });
     } catch (error) {
