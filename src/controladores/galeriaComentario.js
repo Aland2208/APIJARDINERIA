@@ -34,23 +34,39 @@ export const getGaleriaById = async (req, res) => {
 
 export const postGaleriaJardinero = async (req, res) => {
     try {
+        console.log("📥 BODY RECIBIDO:", req.body);
+        console.log("📸 FILE RECIBIDO:", req.file);
+
         const { id_jardinero, id_cliente, titulo, descripcion, tipo, fecha } = req.body;
 
-        // URL de Cloudinary ya procesada por Multer
+        // URL de Cloudinary ya procesada por Multer-Cloudinary
         const url_foto = req.file ? req.file.path : null;
 
         if (!url_foto) {
-            return res.status(400).json({ mensaje: 'Debe subir una imagen' });
+            console.error("❌ No se recibió archivo en req.file");
+            return res.status(400).json({ mensaje: 'Debe subir una imagen', detalle: req.file });
         }
 
-        // 📌 Si no mandan fecha, se usa CURRENT_TIMESTAMP
+        // Si no mandan fecha, MySQL usará CURRENT_TIMESTAMP automáticamente
         const fecha_final = fecha ? fecha : null;
+
+        console.log("📝 Datos para insertar en DB:", {
+            id_jardinero,
+            id_cliente,
+            titulo,
+            descripcion,
+            tipo,
+            url_foto,
+            fecha_final
+        });
 
         const [result] = await conmysql.query(
             `INSERT INTO Galeria(id_jardinero, id_cliente, titulo, descripcion, tipo, url_foto, fecha)
              VALUES (?,?,?,?,?,?,?)`,
             [id_jardinero, id_cliente, titulo, descripcion, tipo, url_foto, fecha_final]
         );
+
+        console.log("✅ Insert OK:", result);
 
         res.json({
             mensaje: 'Foto subida correctamente',
@@ -59,8 +75,16 @@ export const postGaleriaJardinero = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Error al subir imagen:', error);
-        res.status(500).json({ mensaje: 'Internal server error' });
+        console.error('🔥 ERROR AL SUBIR IMAGEN (DETALLADO):');
+        console.error("Mensaje:", error.message);
+        console.error("Stack:", error.stack);
+        console.error("Error completo:", error);
+
+        res.status(500).json({
+            mensaje: 'Internal server error',
+            error: error.message,
+            stack: error.stack
+        });
     }
 };
 
