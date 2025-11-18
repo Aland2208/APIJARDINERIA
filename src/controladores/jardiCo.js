@@ -33,11 +33,11 @@ export const getJardineroTelefono = async (req, res) => {
 
 export const postJardinero = async (req, res) => {
   try {
-    const { nombre_completo, email, telefono, direccion, username, password } = req.body;
+    const { nombre_completo, email, telefono, direccion, foto, username, password } = req.body;
 
     const [insertJardinero] = await conmysql.query(
-      'INSERT INTO Jardineros(nombre_completo, email, telefono, direccion) VALUES (?,?,?,?)',
-      [nombre_completo, email, telefono, direccion]
+      'INSERT INTO Jardineros(nombre_completo, email, telefono, direccion, foto) VALUES (?,?,?,?,?)',
+      [nombre_completo, email, telefono, direccion, foto || null]
     );
 
     const id_jardinero = insertJardinero.insertId;
@@ -57,11 +57,11 @@ export const postJardinero = async (req, res) => {
 export const putJardinero = async (req, res) => {
   try {
     const { id } = req.params;
-    const { nombre_completo, email, telefono, direccion } = req.body;
+    const { nombre_completo, email, telefono, direccion, foto } = req.body;
 
     const [result] = await conmysql.query(
-      'UPDATE Jardineros SET nombre_completo=?, email=?, telefono=?, direccion=? WHERE id_jardinero=?',
-      [nombre_completo, email, telefono, direccion, id]
+      'UPDATE Jardineros SET nombre_completo=?, email=?, telefono=?, direccion=?, foto=? WHERE id_jardinero=?',
+      [nombre_completo, email, telefono, direccion, foto || null, id]
     );
 
     if (result.affectedRows <= 0) return res.status(404).json({ mensaje: 'Jardinero no encontrado' });

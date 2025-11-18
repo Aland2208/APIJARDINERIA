@@ -33,24 +33,21 @@ export const getClienteByIdLoginCli = async (req, res) => {
 
 export const postCliente = async (req, res) => {
     try {
-        const { nombre_completo, email, telefono, direccion, username, password } = req.body;
+        const { nombre_completo, email, telefono, direccion, foto, username, password } = req.body;
 
-        // Validación simple
         if (!nombre_completo || !email || !telefono || !direccion || !username || !password) {
             return res.status(400).json({ mensaje: 'Faltan campos requeridos' });
         }
 
-        // Verificar si el email o username ya existen
         const [existeEmail] = await conmysql.query('SELECT 1 FROM Clientes WHERE email = ?', [email]);
         const [existeUser] = await conmysql.query('SELECT 1 FROM Login_Clientes WHERE username = ?', [username]);
 
         if (existeEmail.length > 0) return res.status(409).json({ mensaje: 'Email ya registrado' });
         if (existeUser.length > 0) return res.status(409).json({ mensaje: 'Usuario ya existe' });
 
-        // Insertar cliente
         const [insertCliente] = await conmysql.query(
-            'INSERT INTO Clientes(nombre_completo, email, telefono, direccion) VALUES (?,?,?,?)',
-            [nombre_completo, email, telefono, direccion]
+            'INSERT INTO Clientes(nombre_completo, email, telefono, direccion, foto) VALUES (?,?,?,?,?)',
+            [nombre_completo, email, telefono, direccion, foto || null]
         );
 
         const id_cliente = insertCliente.insertId;
@@ -63,7 +60,7 @@ export const postCliente = async (req, res) => {
 
         res.status(201).json({ mensaje: 'Cliente registrado exitosamente', id_cliente });
     } catch (error) {
-        console.error('Error en postCliente:', error); // VER logs completos en Render
+        console.error('Error en postCliente:', error);
         res.status(500).json({ mensaje: 'Internal server error' });
     }
 };
@@ -71,10 +68,10 @@ export const postCliente = async (req, res) => {
 export const putCliente = async (req, res) => {
     try {
         const { id } = req.params;
-        const { nombre_completo, email, telefono, direccion } = req.body;
+        const { nombre_completo, email, telefono, direccion, foto } = req.body;
         const [result] = await conmysql.query(
-            'UPDATE Clientes SET nombre_completo=?, email=?, telefono=?, direccion=? WHERE id_cliente=?',
-            [nombre_completo, email, telefono, direccion, id]
+            'UPDATE Clientes SET nombre_completo=?, email=?, telefono=?, direccion=?, foto=? WHERE id_cliente=?',
+            [nombre_completo, email, telefono, direccion, foto || null, id]
         );
         if (result.affectedRows <= 0) return res.status(404).json({ mensaje: 'Cliente no encontrado' });
         const [fila] = await conmysql.query('SELECT * FROM Clientes WHERE id_cliente=?', [id]);
@@ -83,7 +80,6 @@ export const putCliente = async (req, res) => {
         res.status(500).json({ mensaje: 'Internal server error' });
     }
 };
-
 export const deleteCliente = async (req, res) => {
     try {
         const { id } = req.params;
