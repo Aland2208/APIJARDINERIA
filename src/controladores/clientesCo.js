@@ -68,18 +68,57 @@ export const postCliente = async (req, res) => {
 export const putCliente = async (req, res) => {
     try {
         const { id } = req.params;
-        const { nombre_completo, email, telefono, direccion, foto } = req.body;
+        const { nombre_completo, email, telefono, direccion, foto, username, password } = req.body;
+
+        // Actualizar tabla Clientes
         const [result] = await conmysql.query(
             'UPDATE Clientes SET nombre_completo=?, email=?, telefono=?, direccion=?, foto=? WHERE id_cliente=?',
             [nombre_completo, email, telefono, direccion, foto || null, id]
         );
-        if (result.affectedRows <= 0) return res.status(404).json({ mensaje: 'Cliente no encontrado' });
+
+        if (result.affectedRows <= 0)
+            return res.status(404).json({ mensaje: 'Cliente no encontrado' });
+
+        // Actualizar tabla Login_Clientes si se envía username o password
+        if (username || password) {
+            const updates = [];
+            const values = [];
+
+            if (username) {
+                updates.push('username=?');
+                values.push(username);
+            }
+
+            if (password) {
+                const hash = crypto.createHash('md5').update(password).digest('hex');
+                updates.push('password_hash=?');
+                values.push(hash);
+            }
+
+            if (updates.length > 0) {
+                const query = `UPDATE Login_Clientes SET ${updates.join(', ')} WHERE id_cliente=?`;
+                values.push(id);
+                await conmysql.query(query, values);
+            }
+        }
+
+        // Traer los datos actualizados
         const [fila] = await conmysql.query('SELECT * FROM Clientes WHERE id_cliente=?', [id]);
-        res.json(fila[0]);
+        const [loginFila] = await conmysql.query('SELECT username FROM Login_Clientes WHERE id_cliente=?', [id]);
+
+        const clienteActualizado = {
+            ...fila[0],
+            username: loginFila[0]?.username || null
+        };
+
+        res.json(clienteActualizado);
+
     } catch (error) {
+        console.error(error);
         res.status(500).json({ mensaje: 'Internal server error' });
     }
 };
+
 export const deleteCliente = async (req, res) => {
     try {
         const { id } = req.params;
