@@ -75,10 +75,10 @@ export const postGaleriaJardinero = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('🔥 ERROR AL SUBIR IMAGEN (DETALLADO):');
-        console.error("Mensaje:", error.message);
-        console.error("Stack:", error.stack);
-        console.error("Error completo:", error);
+        console.error("🔥 Error detallado al subir imagen:");
+        console.error("➡ Nombre del campo recibido:", req.file?.fieldname);
+        console.error("➡ Body recibido:", req.body);
+        console.error("➡ Error completo:", error);
 
         res.status(500).json({
             mensaje: 'Internal server error',
