@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { verifyToken } from '../middleware/verifyToken.js';
 import {
     postAgenda, postVerificacion, postNotificacion, getVerificaciones, validarAgenda, getAgendaPorCita, updateAgendaPorCita, getNotificacionesPorJardinero, getEnviosPorCliente,
-    getEnviosPorJardinero,
+    getEnviosPorJardinero,updateEnvio,
     postEnvio,
     deleteEnvio,getClientePorAgendaenCitas
 } from '../controladores/agenVeriNoti.js';
@@ -23,5 +23,6 @@ router.get('/EnvioJar/:id_jardinero', getEnviosPorJardinero);
 router.post('/Envio', postEnvio);
 router.delete('/Envio/:id_notificacion', deleteEnvio);
 router.get('/agenda/:id_agenda/cliente', getClientePorAgendaenCitas);
+router.put('/Envio/:id_notificacion', updateEnvio);
 
 export default router;

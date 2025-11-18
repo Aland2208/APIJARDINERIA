@@ -38,8 +38,8 @@ export const postVerificacion = async (req, res) => {
                 id_agenda,
                 id_jardinero,
                 estado,
-                observaciones || null,     
-                precio_final || 0,          
+                observaciones || null,
+                precio_final || 0,
                 fecha_verificacion,
                 hora
             ]
@@ -209,100 +209,169 @@ export const getNotificacionesPorJardinero = async (req, res) => {
 };
 
 export const getEnviosPorCliente = async (req, res) => {
-  try {
-    const { id_cliente } = req.params;
-    const [rows] = await conmysql.query(
-      'SELECT * FROM Notificaciones WHERE id_cliente = ? AND leido = 0 ORDER BY fecha DESC',
-      [id_cliente]
-    );
-    res.json({ data: rows });
-  } catch (error) {
-    console.error('Error obteniendo envíos por cliente:', error);
-    res.status(500).json({ mensaje: 'Internal server error', error: error.message });
-  }
+    try {
+        const { id_cliente } = req.params;
+        const [rows] = await conmysql.query(
+            'SELECT * FROM Notificaciones WHERE id_cliente = ? AND leido = 0 ORDER BY fecha DESC',
+            [id_cliente]
+        );
+        res.json({ data: rows });
+    } catch (error) {
+        console.error('Error obteniendo envíos por cliente:', error);
+        res.status(500).json({ mensaje: 'Internal server error', error: error.message });
+    }
 };
 export const getEnviosPorJardinero = async (req, res) => {
-  try {
-    const { id_jardinero } = req.params;
-    const [rows] = await conmysql.query(
-      'SELECT * FROM Notificaciones WHERE id_jardinero = ? AND leido = 0 ORDER BY fecha DESC',
-      [id_jardinero]
-    );
-    res.json({ data: rows });
-  } catch (error) {
-    console.error('Error obteniendo envíos por jardinero:', error);
-    res.status(500).json({ mensaje: 'Internal server error', error: error.message });
-  }
+    try {
+        const { id_jardinero } = req.params;
+        const [rows] = await conmysql.query(
+            'SELECT * FROM Notificaciones WHERE id_jardinero = ? AND leido = 0 ORDER BY fecha DESC',
+            [id_jardinero]
+        );
+        res.json({ data: rows });
+    } catch (error) {
+        console.error('Error obteniendo envíos por jardinero:', error);
+        res.status(500).json({ mensaje: 'Internal server error', error: error.message });
+    }
 };
 export const postEnvio = async (req, res) => {
-  try {
-    const { id_jardinero, id_cliente, id_agenda, mensaje, fecha, leido } = req.body;
+    try {
+        const { id_jardinero, id_cliente, id_agenda, mensaje, fecha, leido } = req.body;
 
-    const [result] = await conmysql.query(
-      'INSERT INTO Notificaciones(id_jardinero, id_cliente, id_agenda, mensaje, fecha, leido) VALUES (?,?,?,?,?,?)',
-      [id_jardinero || null, id_cliente || null, id_agenda || null, mensaje, fecha, leido || 0]
-    );
+        const [result] = await conmysql.query(
+            'INSERT INTO Notificaciones(id_jardinero, id_cliente, id_agenda, mensaje, fecha, leido) VALUES (?,?,?,?,?,?)',
+            [id_jardinero || null, id_cliente || null, id_agenda || null, mensaje, fecha, leido || 0]
+        );
 
-    res.json({ mensaje: 'Envío creado', id_notificacion: result.insertId });
-  } catch (error) {
-    console.error('Error creando envío:', error);
-    res.status(500).json({ mensaje: 'Internal server error', error: error.message });
-  }
+        res.json({ mensaje: 'Envío creado', id_notificacion: result.insertId });
+    } catch (error) {
+        console.error('Error creando envío:', error);
+        res.status(500).json({ mensaje: 'Internal server error', error: error.message });
+    }
 };
 export const deleteEnvio = async (req, res) => {
-  try {
-    const { id_notificacion } = req.params;
+    try {
+        const { id_notificacion } = req.params;
 
-    const [result] = await conmysql.query(
-      'DELETE FROM Notificaciones WHERE id_notificacion = ?',
-      [id_notificacion]
-    );
+        const [result] = await conmysql.query(
+            'DELETE FROM Notificaciones WHERE id_notificacion = ?',
+            [id_notificacion]
+        );
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ mensaje: 'Envío no encontrado' });
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ mensaje: 'Envío no encontrado' });
+        }
+
+        res.json({ mensaje: 'Envío eliminado' });
+    } catch (error) {
+        console.error('Error eliminando envío:', error);
+        res.status(500).json({ mensaje: 'Internal server error', error: error.message });
     }
-
-    res.json({ mensaje: 'Envío eliminado' });
-  } catch (error) {
-    console.error('Error eliminando envío:', error);
-    res.status(500).json({ mensaje: 'Internal server error', error: error.message });
-  }
 };
 
 export const getClientePorAgendaenCitas = async (req, res) => {
-  try {
-    const { id_agenda } = req.params;
+    try {
+        const { id_agenda } = req.params;
 
-    if (!id_agenda) {
-      return res.status(400).json({ mensaje: 'Se requiere id_agenda' });
+        if (!id_agenda) {
+            return res.status(400).json({ mensaje: 'Se requiere id_agenda' });
+        }
+
+        const [agendaRows] = await conmysql.query(
+            'SELECT id_cita FROM Agenda WHERE id_agenda = ?',
+            [id_agenda]
+        );
+
+        if (agendaRows.length === 0) {
+            return res.status(404).json({ mensaje: 'No se encontró agenda con ese id' });
+        }
+
+        const id_cita = agendaRows[0].id_cita;
+
+        const [citaRows] = await conmysql.query(
+            'SELECT id_cliente FROM Citas WHERE id_cita = ?',
+            [id_cita]
+        );
+
+        if (citaRows.length === 0) {
+            return res.status(404).json({ mensaje: 'No se encontró cita asociada a esta agenda' });
+        }
+
+        const id_cliente = citaRows[0].id_cliente;
+
+        res.json({ id_cliente, id_cita, id_agenda });
+
+    } catch (error) {
+        console.error('Error en getClientePorAgenda:', error);
+        res.status(500).json({ mensaje: 'Error interno al obtener cliente', error: error.message });
     }
-
-    const [agendaRows] = await conmysql.query(
-      'SELECT id_cita FROM Agenda WHERE id_agenda = ?',
-      [id_agenda]
-    );
-
-    if (agendaRows.length === 0) {
-      return res.status(404).json({ mensaje: 'No se encontró agenda con ese id' });
-    }
-
-    const id_cita = agendaRows[0].id_cita;
-
-    const [citaRows] = await conmysql.query(
-      'SELECT id_cliente FROM Citas WHERE id_cita = ?',
-      [id_cita]
-    );
-
-    if (citaRows.length === 0) {
-      return res.status(404).json({ mensaje: 'No se encontró cita asociada a esta agenda' });
-    }
-
-    const id_cliente = citaRows[0].id_cliente;
-
-    res.json({ id_cliente, id_cita, id_agenda });
-    
-  } catch (error) {
-    console.error('Error en getClientePorAgenda:', error);
-    res.status(500).json({ mensaje: 'Error interno al obtener cliente', error: error.message });
-  }
 };
+export const updateEnvio = async (req, res) => {
+    try {
+        const { id_notificacion } = req.params;
+        const { id_jardinero, id_cliente, id_agenda, mensaje, fecha, leido } = req.body;
+
+        if (!id_notificacion) {
+            return res.status(400).json({ mensaje: "Se requiere id_notificacion" });
+        }
+
+        // Construcción dinámica de SET
+        const campos = [];
+        const valores = [];
+
+        if (id_jardinero !== undefined) {
+            campos.push("id_jardinero = ?");
+            valores.push(id_jardinero);
+        }
+
+        if (id_cliente !== undefined) {
+            campos.push("id_cliente = ?");
+            valores.push(id_cliente);
+        }
+
+        if (id_agenda !== undefined) {
+            campos.push("id_agenda = ?");
+            valores.push(id_agenda);
+        }
+
+        if (mensaje !== undefined) {
+            campos.push("mensaje = ?");
+            valores.push(mensaje);
+        }
+
+        if (fecha !== undefined) {
+            campos.push("fecha = ?");
+            valores.push(fecha);
+        }
+
+        if (leido !== undefined) {
+            campos.push("leido = ?");
+            valores.push(leido);
+        }
+
+        if (campos.length === 0) {
+            return res.status(400).json({ mensaje: "No se enviaron campos para actualizar" });
+        }
+
+        valores.push(id_notificacion);
+
+        const [result] = await conmysql.query(
+            `UPDATE Notificaciones SET ${campos.join(", ")} WHERE id_notificacion = ?`,
+            valores
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ mensaje: "Envío no encontrado" });
+        }
+
+        res.json({
+            mensaje: "Envío actualizado correctamente",
+            cambios: result.affectedRows
+        });
+
+    } catch (error) {
+        console.error("Error actualizando envío:", error);
+        res.status(500).json({ mensaje: "Internal server error", error: error.message });
+    }
+};
+
