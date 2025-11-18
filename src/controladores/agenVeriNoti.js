@@ -212,7 +212,7 @@ export const getEnviosPorCliente = async (req, res) => {
   try {
     const { id_cliente } = req.params;
     const [rows] = await conmysql.query(
-      'SELECT * FROM Notificaciones WHERE id_cliente = ? ORDER BY fecha DESC',
+      'SELECT * FROM Notificaciones WHERE id_cliente = ? AND leido = 0 ORDER BY fecha DESC',
       [id_cliente]
     );
     res.json({ data: rows });
@@ -225,7 +225,7 @@ export const getEnviosPorJardinero = async (req, res) => {
   try {
     const { id_jardinero } = req.params;
     const [rows] = await conmysql.query(
-      'SELECT * FROM Notificaciones WHERE id_jardinero = ? ORDER BY fecha DESC',
+      'SELECT * FROM Notificaciones WHERE id_jardinero = ? AND leido = 0 ORDER BY fecha DESC',
       [id_jardinero]
     );
     res.json({ data: rows });
