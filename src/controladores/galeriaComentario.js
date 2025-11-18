@@ -32,7 +32,7 @@ export const getGaleriaById = async (req, res) => {
 };
 
 
-export const postGaleria = async (req, res) => {
+export const postGaleriaJardinero = async (req, res) => {
     try {
         const { id_jardinero, id_cliente, titulo, descripcion, tipo, fecha } = req.body;
 
