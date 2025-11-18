@@ -1,11 +1,12 @@
 import { Router } from 'express';
 import { verifyToken } from '../middleware/verifyToken.js';
-import { getJardineros, getJardineroById, postJardinero, putJardinero, deleteJardinero,getJardineroTelefono  } from '../controladores/jardiCo.js';
+import { getJardineros, getJardineroById, postJardinero, putJardinero, deleteJardinero,getJardineroTelefono,getJardinerosByIdLoginJard } from '../controladores/jardiCo.js';
 
 const router = Router();
 
 router.get('/jardineros', verifyToken, getJardineros);
 router.get('/jardineros/:id', verifyToken, getJardineroById);
+router.get('/JardinerosID/:id', verifyToken, getJardinerosByIdLoginJard);
 router.post('/jardineros', postJardinero);
 router.put('/jardineros/:id', verifyToken, putJardinero);
 router.delete('/jardineros/:id', verifyToken, deleteJardinero);

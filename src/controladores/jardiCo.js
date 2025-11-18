@@ -21,6 +21,15 @@ export const getJardineroById = async (req, res) => {
     res.status(500).json({ mensaje: 'Internal server error' });
   }
 };
+export const getJardinerosByIdLoginJard= async (req, res) => {
+    try {
+        const [result] = await conmysql.query('SELECT * FROM Login_Jardineros WHERE id_jardinero = ?', [req.params.id]);
+        if (result.length <= 0) return res.json({ cantidad: 0, mensaje: 'Jardinero no encontrado' });
+        res.json({ cantidad: result.length, data: result[0] });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Internal server error' });
+    }
+};
 export const getJardineroTelefono = async (req, res) => {
   try {
     const [result] = await conmysql.query('SELECT * FROM Jardineros WHERE telefono = ?', [req.params.telefono]);
