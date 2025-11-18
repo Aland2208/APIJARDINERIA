@@ -166,7 +166,7 @@ export const getNotificacionesPorJardinero = async (req, res) => {
         const [citas] = await conmysql.query(
             `SELECT * FROM Citas 
              WHERE id_jardinero_asignado = ? 
-               AND estado = 'aceptada'`,
+               AND estado = 'completado'`,
             [id_jardinero]
         );
 
