@@ -21,14 +21,14 @@ export const getJardineroById = async (req, res) => {
     res.status(500).json({ mensaje: 'Internal server error' });
   }
 };
-export const getJardinerosByIdLoginJard= async (req, res) => {
-    try {
-        const [result] = await conmysql.query('SELECT * FROM Login_Jardineros WHERE id_jardinero = ?', [req.params.id]);
-        if (result.length <= 0) return res.json({ cantidad: 0, mensaje: 'Jardinero no encontrado' });
-        res.json({ cantidad: result.length, data: result[0] });
-    } catch (error) {
-        res.status(500).json({ mensaje: 'Internal server error' });
-    }
+export const getJardinerosByIdLoginJard = async (req, res) => {
+  try {
+    const [result] = await conmysql.query('SELECT * FROM Login_Jardineros WHERE id_jardinero = ?', [req.params.id]);
+    if (result.length <= 0) return res.json({ cantidad: 0, mensaje: 'Jardinero no encontrado' });
+    res.json({ cantidad: result.length, data: result[0] });
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Internal server error' });
+  }
 };
 export const getJardineroTelefono = async (req, res) => {
   try {
@@ -66,18 +66,54 @@ export const postJardinero = async (req, res) => {
 export const putJardinero = async (req, res) => {
   try {
     const { id } = req.params;
-    const { nombre_completo, email, telefono, direccion, foto } = req.body;
+    const { nombre_completo, email, telefono, direccion, foto, username, password } = req.body;
 
+    // 1️⃣ Actualizar tabla Jardineros
     const [result] = await conmysql.query(
       'UPDATE Jardineros SET nombre_completo=?, email=?, telefono=?, direccion=?, foto=? WHERE id_jardinero=?',
       [nombre_completo, email, telefono, direccion, foto || null, id]
     );
 
-    if (result.affectedRows <= 0) return res.status(404).json({ mensaje: 'Jardinero no encontrado' });
+    if (result.affectedRows <= 0) {
+      return res.status(404).json({ mensaje: 'Jardinero no encontrado' });
+    }
 
-    const [fila] = await conmysql.query('SELECT * FROM Jardineros WHERE id_jardinero=?', [id]);
-    res.json(fila[0]);
+    // 2️⃣ Actualizar tabla Login_Jardineros si hay username o password
+    if (username || password) {
+      const updates = [];
+      const values = [];
+
+      if (username) {
+        updates.push('username=?');
+        values.push(username);
+      }
+
+      if (password) {
+        const hash = crypto.createHash('md5').update(password).digest('hex');
+        updates.push('password_hash=?');
+        values.push(hash);
+      }
+
+      if (updates.length > 0) {
+        const query = `UPDATE Login_Jardineros SET ${updates.join(', ')} WHERE id_jardinero=?`;
+        values.push(id);
+        await conmysql.query(query, values);
+      }
+    }
+
+    // 3️⃣ Traer datos combinados de Jardineros + Login_Jardineros
+    const [jardinero] = await conmysql.query('SELECT * FROM Jardineros WHERE id_jardinero=?', [id]);
+    const [login] = await conmysql.query('SELECT username FROM Login_Jardineros WHERE id_jardinero=?', [id]);
+
+    const jardineroActualizado = {
+      ...jardinero[0],
+      username: login[0]?.username || null
+    };
+
+    res.json(jardineroActualizado);
+
   } catch (error) {
+    console.error(error);
     res.status(500).json({ mensaje: 'Internal server error' });
   }
 };
