@@ -18,7 +18,7 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: 'productos', // Carpeta principal en tu cuenta de Cloudinary
-    allowed_formats: ['jpg', 'png', 'jpeg'],
+    allowed_formats: ['jpg', 'png', 'jpeg', 'ico'],
     public_id: (req, file) => {
       // Generar nombre único para evitar duplicados
       const nombreSinExt = path.parse(file.originalname).name;
