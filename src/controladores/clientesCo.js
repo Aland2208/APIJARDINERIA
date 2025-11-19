@@ -1,6 +1,4 @@
 import { conmysql } from '../db.js';
-import jwt from 'jsonwebtoken';
-import { JWT_SECRET } from '../config.js';
 import crypto from 'crypto';
 
 export const getClientes = async (req, res) => {
