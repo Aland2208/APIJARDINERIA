@@ -126,3 +126,31 @@ export const deleteJardinero = async (req, res) => {
     res.status(500).json({ mensaje: 'Internal server error' });
   }
 };
+
+export const getEstadisticaTrabajos = async (req, res) => {
+  try {
+    const id_jardinero = req.params.id;
+
+    const [result] = await conmysql.query(`
+      SELECT 
+          tt.nombre_tipo AS tipo_trabajo,
+          v.estado AS estado_verificacion,
+          COUNT(*) AS total
+      FROM Verificaciones v
+      INNER JOIN Agenda a ON v.id_agenda = a.id_agenda
+      INNER JOIN Citas c ON a.id_cita = c.id_cita
+      INNER JOIN Tipos_Trabajo tt ON c.id_tipo_trabajo = tt.id_tipo_trabajo
+      WHERE v.id_jardinero = ?
+      GROUP BY tt.nombre_tipo, v.estado
+      ORDER BY tt.nombre_tipo, v.estado;
+    `, [id_jardinero]);
+
+    res.json({ cantidad: result.length, data: result });
+
+  } catch (error) {
+    console.error("Error en getEstadisticaTrabajos:", error);
+    res.status(500).json({ mensaje: 'Internal server error' });
+  }
+};
+
+
