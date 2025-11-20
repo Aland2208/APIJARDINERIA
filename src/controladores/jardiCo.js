@@ -151,6 +151,3 @@ export const getEstadisticaTrabajos = async (req, res) => {
     res.status(500).json({ mensaje: 'Internal server error' });
   }
 };
-
-
-
