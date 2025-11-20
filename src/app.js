@@ -24,13 +24,15 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Configuración de CORS
-const corsOptions = {
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+app.use(cors({
+  origin: ['http://localhost:8100', 'https://apijardineria.onrender.com'],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
-};
-app.use(cors(corsOptions));
+}));
+
+app.options('*', cors());
+
 
 // ✅ Servir archivos estáticos (si más adelante subes imágenes locales)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
