@@ -26,7 +26,7 @@ export const crearChat = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error al crear chat:", error);
+       // console.error("Error al crear chat:", error);
         res.status(500).json({ mensaje: "Internal server error" });
     }
 };
@@ -45,7 +45,7 @@ export const getMensajesByChat = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error al obtener mensajes:", error);
+        //console.error("Error al obtener mensajes:", error);
         res.status(500).json({ mensaje: "Internal server error" });
     }
 };
@@ -62,7 +62,7 @@ export const postMensaje = async (req, res) => {
 
         res.json({ mensaje: 'Mensaje enviado', id_mensaje: result.insertId, url_imagen });
     } catch (error) {
-        console.error('Error al enviar mensaje:', error);
+        //console.error('Error al enviar mensaje:', error);
         res.status(500).json({ mensaje: 'Internal server error' });
     }
 
@@ -108,7 +108,7 @@ export const getMensajesByCliente = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error al obtener mensajes del cliente:", error);
+        //console.error("Error al obtener mensajes del cliente:", error);
         res.status(500).json({ mensaje: "Internal server error" });
     }
 };
@@ -151,7 +151,7 @@ export const getMensajesByJardinero = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error al obtener mensajes del jardinero:", error);
+       // console.error("Error al obtener mensajes del jardinero:", error);
         res.status(500).json({ mensaje: "Internal server error" });
     }
 };
