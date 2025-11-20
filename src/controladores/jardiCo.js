@@ -137,9 +137,8 @@ export const getEstadisticaTrabajos = async (req, res) => {
           c.estado AS estado_cita,
           COUNT(*) AS total
       FROM Citas c
-      INNER JOIN Agenda a ON c.id_cita = a.id_cita
       INNER JOIN Tipos_Trabajo tt ON c.id_tipo_trabajo = tt.id_tipo_trabajo
-      WHERE a.id_jardinero = ?
+      WHERE c.id_jardinero_asignado = ?
       GROUP BY tt.nombre_tipo, c.estado
       ORDER BY tt.nombre_tipo, c.estado;
     `, [id_jardinero]);
@@ -151,3 +150,4 @@ export const getEstadisticaTrabajos = async (req, res) => {
     res.status(500).json({ mensaje: 'Internal server error' });
   }
 };
+
