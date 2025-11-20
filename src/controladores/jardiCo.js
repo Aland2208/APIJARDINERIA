@@ -134,15 +134,14 @@ export const getEstadisticaTrabajos = async (req, res) => {
     const [result] = await conmysql.query(`
       SELECT 
           tt.nombre_tipo AS tipo_trabajo,
-          v.estado AS estado_verificacion,
+          c.estado AS estado_cita,
           COUNT(*) AS total
-      FROM Verificaciones v
-      INNER JOIN Agenda a ON v.id_agenda = a.id_agenda
-      INNER JOIN Citas c ON a.id_cita = c.id_cita
+      FROM Citas c
+      INNER JOIN Agenda a ON c.id_cita = a.id_cita
       INNER JOIN Tipos_Trabajo tt ON c.id_tipo_trabajo = tt.id_tipo_trabajo
-      WHERE v.id_jardinero = ?
-      GROUP BY tt.nombre_tipo, v.estado
-      ORDER BY tt.nombre_tipo, v.estado;
+      WHERE a.id_jardinero = ?
+      GROUP BY tt.nombre_tipo, c.estado
+      ORDER BY tt.nombre_tipo, c.estado;
     `, [id_jardinero]);
 
     res.json({ cantidad: result.length, data: result });
@@ -152,5 +151,7 @@ export const getEstadisticaTrabajos = async (req, res) => {
     res.status(500).json({ mensaje: 'Internal server error' });
   }
 };
+
+
 
 
